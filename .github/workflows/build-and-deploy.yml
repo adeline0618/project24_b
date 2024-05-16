@@ -57,7 +57,10 @@ jobs:
 
       - name: Run JAR on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa_github -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "nohup java -jar /home/${{ secrets.REMOTE_USER }}/project24/back/$(ls /home/${{ secrets.REMOTE_USER }}/project24/back/*.jar | xargs -n 1 basename) > /home/${{ secrets.REMOTE_USER }}/project24/back/app.log 2>&1 &"
+            ssh -i ~/.ssh/id_rsa_github -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "
+            nohup java -jar /home/${{ secrets.REMOTE_USER }}/project24/back/project24.jar > /home/${{ secrets.REMOTE_USER }}/project24/back/back.log 2>&1 &
+            echo 'JAR file is running.'
+            "
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}

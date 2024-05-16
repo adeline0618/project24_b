@@ -33,6 +33,11 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
+// JAR 파일 이름 설정
+bootJar {
+	archiveFileName = 'project24.jar'
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
