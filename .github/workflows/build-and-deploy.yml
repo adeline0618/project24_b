@@ -36,5 +36,16 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa_github
 
+      - name: Verify SSH connection
+        run: |
+          ssh -o StrictHostKeyChecking=no -v ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo 'SSH connection successful'"
+        env:
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+
       - name: Deploy to server
-        run: scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/build/libs/*.jar ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/project24/back/
+        run: |
+          scp -o StrictHostKeyChecking=no -v $GITHUB_WORKSPACE/build/libs/*.jar ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/project24/back/
+        env:
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
