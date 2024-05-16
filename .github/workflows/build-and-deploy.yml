@@ -25,24 +25,16 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_github
+          chmod 600 ~/.ssh/id_rsa_github
           ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Install expect
-        run: sudo apt-get install -y expect
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add SSH key to agent
         run: |
           eval "$(ssh-agent -s)"
-          expect <<EOF
-          spawn ssh-add ~/.ssh/id_rsa
-          expect "Enter passphrase for ~/.ssh/id_rsa:"
-          send "$env(SSH_PASSPHRASE)\r"
-          interact
-          EOF
-        env:
-          SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
+          ssh-add ~/.ssh/id_rsa_github
 
       - name: Deploy to server
         run: scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/build/libs/*.jar ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/project24/back/
