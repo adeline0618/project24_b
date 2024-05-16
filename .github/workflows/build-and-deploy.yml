@@ -55,7 +55,8 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
 
-      - name: Restart JAR
+
+      - name: Restart JAR on remote server
         run: |
             ssh -i ~/.ssh/id_rsa_github -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "
             # Check if the JAR file is running
@@ -64,8 +65,16 @@ jobs:
               echo 'Stopping existing JAR process: ' \$PID
               kill -9 \$PID
               sleep 5
+              # Verify the process is terminated
+              if pgrep -f 'project24.jar' > /dev/null; then
+                echo 'Failed to stop the process'
+                exit 1
+              else
+                echo 'Process stopped successfully'
+              fi
             fi
-            
+          
+          
             # Set JAVA_HOME and PATH
             export JAVA_HOME=/opt/jdk-18
             export PATH=\$JAVA_HOME/bin:\$PATH
@@ -74,6 +83,6 @@ jobs:
             nohup java -jar /home/${{ secrets.REMOTE_USER }}/project24/back/project24.jar > /home/${{ secrets.REMOTE_USER }}/project24/back/back.log 2>&1 &
             echo 'JAR file is running.'
             "
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          env:
+            REMOTE_USER: ${{ secrets.REMOTE_USER }}
+            REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
