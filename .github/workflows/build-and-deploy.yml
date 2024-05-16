@@ -28,6 +28,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_github
           chmod 600 ~/.ssh/id_rsa_github
           ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          echo "SSH key has been set up and known_hosts updated."
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
@@ -35,17 +36,21 @@ jobs:
         run: |
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa_github
+          ssh-add -l
+          echo "SSH key added to the agent."
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Verify SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=no -v ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo 'SSH connection successful'"
+          ssh -i ~/.ssh/id_rsa_github -o StrictHostKeyChecking=no -v ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo 'SSH connection successful'"
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
 
       - name: Deploy to server
         run: |
-          scp -o StrictHostKeyChecking=no -v $GITHUB_WORKSPACE/build/libs/*.jar ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/project24/back/
+          scp -i ~/.ssh/id_rsa_github -o StrictHostKeyChecking=no -v $GITHUB_WORKSPACE/build/libs/*.jar ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/home/${{ secrets.REMOTE_USER }}/project24/back/
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
